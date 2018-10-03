@@ -49,25 +49,34 @@ zipcodesPromise.then(function(dataSource) {
     var zipcodeEntities = dataSource.entities.values;
     for (var i = 0; i < zipcodeEntities.length; i++) {
         var entity = zipcodeEntities[i];
-
+        var rsrp_snr;
+        var best_carrier_rsrp;
         if (Cesium.defined(entity.polygon)) {
             entity.name = entity.properties.ZIP;
             if (entity.properties.CarrierA_rsrp_rank == 1){
+            best_carrier_rsrp = 'CarrierA';
+            rsrp_snr = entity.properties.CarrierA_snr;
             entity.best_rsrp = entity.properties.CarrierA_rsrp;
             entity.polygon.material =Cesium.Color.fromBytes(66,244,128).withAlpha(0.7);
             }
 
             if (entity.properties.CarrierB_rsrp_rank == 1){
+            best_carrier_rsrp = 'CarrierB';
+            rsrp_snr = entity.properties.CarrierB_snr;
             entity.best_rsrp = entity.properties.CarrierB_rsrp;
             entity.polygon.material = Cesium.Color.fromBytes(244,244,66).withAlpha(0.7);
             }
 
             if (entity.properties.CarrierC_rsrp_rank == 1){
+            best_carrier_rsrp = 'CarrierC';
+            rsrp_snr = entity.properties.CarrierC_snr;
             entity.best_rsrp = entity.properties.CarrierC_rsrp;
             entity.polygon.material = Cesium.Color.fromBytes(224,35,35).withAlpha(0.7);
             }
 
             if (entity.properties.CarrierD_rsrp_rank == 1){
+            best_carrier_rsrp = 'CarrierD';
+            rsrp_snr = entity.properties.CarrierD_snr;
             entity.best_rsrp = entity.properties.CarrierD_rsrp;
             entity.polygon.material = Cesium.Color.fromBytes(244,113,66).withAlpha(0.7);
             }
@@ -89,11 +98,13 @@ zipcodesPromise.then(function(dataSource) {
         };
 
        
-        entity.description = "Best RSRP Per Zip<br> Green: CarrierA<br> Yellow: CarrierB<br> Red: CarrierC<br> Orange: CarrierD<br>" + "Best_RSRP: " + parseFloat(entity.best_rsrp).toFixed(0) + " dBm";
+        entity.description = "Best RSRP: " + best_carrier_rsrp + "<br>RSRP: " + parseFloat(entity.best_rsrp).toFixed(2) + " dBm<br>SNR:" + parseFloat(rsrp_snr).toFixed(2) + " dB"; 
 
         }
     }
 });
+
+
 
 
 
@@ -113,6 +124,7 @@ function osm_box(data) {
     var entity = data[i];
     var height;
     var best_carrier;
+    var snr_rsrp;
     var ht_check;
     //console.log(entity);
     var position;
@@ -126,6 +138,7 @@ function osm_box(data) {
     var box_color;
     if (CarrierA_rank === 1){
         best_carrier = 'CarrierA';
+        snr_rsrp = entity.CarrierA_rsrp;
         ht_check = parseFloat(entity.CarrierA_snr);
         if (ht_check > 0){
             height = (entity.CarrierA_snr)*1000;
@@ -145,7 +158,8 @@ function osm_box(data) {
     }
     if (CarrierB_rank === 1){
         best_carrier = 'CarrierB';
-                ht_check = parseFloat(entity.CarrierB_snr);
+        snr_rsrp = entity.CarrierB_rsrp;
+        ht_check = parseFloat(entity.CarrierB_snr);
         if (ht_check > 0){
             height = (entity.CarrierB_snr)*1000;
             position = Cesium.Cartesian3.fromDegrees(
@@ -164,6 +178,7 @@ function osm_box(data) {
     }
     if (CarrierC_rank ===1){
         best_carrier = 'CarrierC';
+        snr_rsrp = entity.CarrierC_rsrp;
         ht_check = parseFloat(entity.CarrierC_snr);
         if (ht_check > 0){
             height = (entity.CarrierC_snr)*1000;
@@ -183,6 +198,7 @@ function osm_box(data) {
     }
     if (CarrierD_rank ===1){
         best_carrier = 'CarrierD';
+        snr_rsrp = entity.CarrierD_rsrp;
         ht_check = parseFloat(entity.CarrierD_snr);
         if (ht_check > 0){
             height = (entity.CarrierD_snr)*1000;
@@ -205,7 +221,7 @@ function osm_box(data) {
         "Best_snr" : ht_check
     };
     var ces_pro = new Cesium.PropertyBag(prop_object);
-    entity.description = "Best SNR PER ZIP<br> Green: CarrierA <br>Yellow: CarrierB<br> Red: CarrierC <br> Orange: CarrierD<br>Best_SNR: " + parseFloat(ht_check).toFixed(2) + " dB"; 
+    entity.description = "Best SNR: " + best_carrier + "<br>SNR: " + parseFloat(ht_check).toFixed(2) + " dB<br>RSRP:" + parseFloat(snr_rsrp).toFixed(2) + " dBm"; 
     entities.add({
       parent: osmBoxes,
       name : entity.ZIP,
